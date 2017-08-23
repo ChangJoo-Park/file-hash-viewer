@@ -1,5 +1,5 @@
 import Vue from 'vue'
-
+import 'izitoast/dist/css/iziToast.min.css'
 import App from './App'
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
