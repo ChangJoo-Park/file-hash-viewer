@@ -1,30 +1,37 @@
 <template>
   <div id='app'>
-    <div class="dropzone-wrapper">
-      <input id='dropzone' type='file' />
-    </div>
-    <div class="loading-indicator" v-if="isLoading">
-      LOADING
+    <div class="dropzone-wrapper" v-if="!isLoading">
+      <input id='dropzone' type='file' @change="changeFile" />
+      <hr class="hr">
     </div>
     <!-- Hash Viewer -->
-    <div id="hash-viewer" v-if="fileSelected && !isLoading">
-      <ul>
-        <li v-for="hash in hashes" :key="hash.value">
-          <strong>{{hash.algorithm}}</strong> - {{hash.value}}
-        </li>
-      </ul>
-    </div>
+    <loader v-if="isLoading"></loader>
+    <hash-viewer v-if="fileSelected && !isLoading" :hashes="hashes"></hash-viewer>
   </div>
 </template>
 
 <script>
 import hasha from 'hasha'
+import Loader from './components/Loader'
+import HashViewer from './components/HashViewer'
 
 export default {
   name: 'file-hash-calculator',
-  mounted: function () {
-    document.getElementById('dropzone').addEventListener('change', (e) => {
-      const files = e.target.files
+  components: {
+    Loader,
+    HashViewer
+  },
+  data: function () {
+    return {
+      fileSelected: false,
+      isLoading: false,
+      algorithms: ['md5', 'sha1', 'sha256', 'sha512'],
+      hashes: []
+    }
+  },
+  methods: {
+    changeFile ({ type, target }) {
+      const files = target.files
       this.fileSelected = files.length > 0
       if (!this.fileSelected) {
         return
@@ -50,39 +57,47 @@ export default {
           })
           this.isLoading = false
         })
-    })
-  },
-  beforeDestroy: () => {
-    document.getElementById('dropzone').removeEventListener('change')
-  },
-  data: function () {
-    return {
-      maxSize: 100,
-      fileSelected: false,
-      isLoading: false,
-      algorithms: ['md5', 'sha1', 'sha256', 'sha512'],
-      hashes: []
     }
-  },
-  methods: {
   }
 }
 </script>
 
 <style lang="scss">
-  /* CSS */
+@font-face {
+  font-family: 'Open Sans';
+  src: url(./assets/OpenSans-Regular.ttf);
+}
+
+html, body {
+  background-color: tomato;
+}
+
+#app {
+  font-family: 'Open Sans';
+}
+
 .dropzone-wrapper {
-  margin-top: 50px;
+  margin-top: 10px;
+  margin-bottom: 20px;
   text-align: center;
 }
+.dropzone-wrapper:hover input[type='file'] {
+  background-color: rgba(255,99,71, 0.6);
+}
+
+.hr {
+  background-color: #fff;
+}
+
 input[type='file'] {
     border: 3px dashed tomato;
     padding: 140px 50px 10px 50px;
-    cursor: move;
+    cursor: pointer;
     position:relative;
 }
+
 input[type='file']:before {
-    content: 'drag & drop your files here';
+    content: '파일을 선택하세요';
     display: block;
     position: absolute;
     text-align: center;
@@ -93,6 +108,20 @@ input[type='file']:before {
     margin: -25px 0 0 -100px;
     font-size: 18px;
     font-weight: bold;
-    color: tomato;
+}
+
+input[type='file']:active, input[type='file']:focus {
+  outline: none;
+}
+
+#app {
+  width: 100%;
+  overflow: hidden;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #3b405b;
+  color: #fff;
 }
 </style>
